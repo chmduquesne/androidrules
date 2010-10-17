@@ -2,6 +2,7 @@ package com.googlecode.androidrules.actions;
 
 import java.util.ArrayList;
 
+import com.googlecode.androidrules.BroadcastsHandlerService;
 import com.googlecode.androidrules.contacts.Contact;
 import com.googlecode.androidrules.contacts.ContactAddress;
 import com.googlecode.androidrules.contacts.ContactsManager;
@@ -77,12 +78,12 @@ public class NotifyMatchingContactsAction extends Action {
                         strContact.append("\r\n" + address.label + " - " + address.address);
                     }
                 }
-                Intent i = new Intent("ACTION_TALKMYPHONE_MESSAGE_TO_TRANSMIT");
+                Intent i = new Intent(BroadcastsHandlerService.MESSAGE_TO_TRANSMIT);
                 i.putExtra("message", strContact.toString() + "\r\n");
                 mContext.sendBroadcast(i);
             }
         } else {
-            Intent i = new Intent("ACTION_TALKMYPHONE_MESSAGE_TO_TRANSMIT");
+            Intent i = new Intent(BroadcastsHandlerService.MESSAGE_TO_TRANSMIT);
             i.putExtra("message", "No match for \"" + searchedText + "\"");
             mContext.sendBroadcast(i);
         }

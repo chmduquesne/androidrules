@@ -36,6 +36,12 @@ import android.os.IBinder;
  * This class monitors phone events and user actions and triggers actions on events when conditions are met
  */
 public class BroadcastsHandlerService extends Service {
+    
+    // Intent broadcasted to the system when the user sends a command to talkmyphone via jabber
+    public final static String USER_COMMAND_RECEIVED = "com.googlecode.talkmyphone.USER_COMMAND_RECEIVED";
+    
+    // Intent broadcasted by the system when it wants to send a message to the user via talkmyphone
+    public final static String MESSAGE_TO_TRANSMIT = "com.googlecode.talkmyphone.MESSAGE_TO_TRANSMIT";
 
     private Context mContext;
     private ArrayList<Rule> mRules = new ArrayList<Rule>();
@@ -86,17 +92,17 @@ public class BroadcastsHandlerService extends Service {
         builder.append("- \"ring\": rings the phone until you send \"stop\"\n");
         builder.append("- \"copy:#text#\": copy text to clipboard\n");
         builder.append("and you can paste links and open it with the appropriate app\n");
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("?"),
                 new SendAction(mContext, builder.toString()),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("ring"),
                 new RingAction(mContext),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("stop"),
                 new ActionsSequence(
                         new SendAction(mContext, "Stopping ongoing actions"),
@@ -105,12 +111,12 @@ public class BroadcastsHandlerService extends Service {
                         ),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("copy"),
                 new CopyToClipBoardAction(mContext),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("contact"),
                 new NotifyMatchingContactsAction(mContext),
                 null);
@@ -130,17 +136,17 @@ public class BroadcastsHandlerService extends Service {
                 new NotifySmsReceivedAction(mContext),
                 "notifyIncomingSms");
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("dial"),
                 new DialAction(mContext),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("http"),
                 new OpenAction(mContext),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("https"),
                 new OpenAction(mContext),
                 null);
@@ -150,22 +156,22 @@ public class BroadcastsHandlerService extends Service {
                 new NotifyResultOfActionAction(mContext),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("sms"),
                 new SendOrReadSmsAction(mContext),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("reply"),
                 new SendSmsToLastRecipientAction(mContext),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("where"),
                 new StartLocatingPhoneAction(mContext),
                 null);
 
-        addRule(new IntentFilter("ACTION_TALKMYPHONE_USER_COMMAND_RECEIVED"),
+        addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("geo"),
                 new GeoAction(mContext),
                 null);

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.gsm.SmsMessage;
 
+import com.googlecode.androidrules.BroadcastsHandlerService;
 import com.googlecode.androidrules.contacts.ContactsManager;
 
 public class NotifySmsReceivedAction extends Action {
@@ -35,7 +36,7 @@ public class NotifySmsReceivedAction extends Action {
                 // TODO : Fix that
                 //service.setLastRecipient(msgs[i].getOriginatingAddress());
             }
-            Intent i = new Intent("ACTION_TALKMYPHONE_MESSAGE_TO_TRANSMIT");
+            Intent i = new Intent(BroadcastsHandlerService.MESSAGE_TO_TRANSMIT);
             i.putExtra("message", builder.toString());
             mContext.sendBroadcast(i);
         }

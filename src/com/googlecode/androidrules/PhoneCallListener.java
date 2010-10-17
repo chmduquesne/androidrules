@@ -24,7 +24,7 @@ public class PhoneCallListener extends PhoneStateListener {
             case TelephonyManager.CALL_STATE_RINGING:
                 ContactsManager contactsManager = new ContactsManager(mContext);
                 String contact = contactsManager.getContactName(incomingNumber);
-                Intent i = new Intent("ACTION_TALKMYPHONE_MESSAGE_TO_TRANSMIT");
+                Intent i = new Intent(BroadcastsHandlerService.MESSAGE_TO_TRANSMIT);
                 i.putExtra("message", contact + "is calling");
                 mContext.sendBroadcast(i);
                 break;

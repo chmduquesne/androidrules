@@ -1,5 +1,7 @@
 package com.googlecode.androidrules.actions;
 
+import com.googlecode.androidrules.BroadcastsHandlerService;
+
 import android.content.Context;
 import android.content.Intent;
 
@@ -26,7 +28,7 @@ public class NotifyBatteryStateAction extends Action {
     }
     private void notifyAndSavePercentage(int level) {
         lastPercentageNotified = level;
-        Intent i = new Intent("ACTION_TALKMYPHONE_MESSAGE_TO_TRANSMIT");
+        Intent i = new Intent(BroadcastsHandlerService.MESSAGE_TO_TRANSMIT);
         i.putExtra("message", "Battery level " + level + "%");
         mContext.sendBroadcast(i);
     }
