@@ -16,12 +16,12 @@ public class MainScreen extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
+
         Button startStopButton = (Button) findViewById(R.id.StartStop);
         startStopButton.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
                     Intent intent = new Intent(".androidrules.START_STOP_SERVICE");
-                    if (!BroadcastsHandlerService.isRunning()) {
+                    if (!BroadcastsHandlerService.isRunning(getApplicationContext())) {
                         startService(intent);
                         Toast.makeText(getApplicationContext(), "Android Rules started", Toast.LENGTH_SHORT).show();
                     }

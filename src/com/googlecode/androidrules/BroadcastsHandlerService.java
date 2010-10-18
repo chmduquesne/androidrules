@@ -1,6 +1,7 @@
 package com.googlecode.androidrules;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 import com.googlecode.androidrules.actions.Action;
@@ -26,7 +27,10 @@ import com.googlecode.androidrules.actions.StopRingingAction;
 import com.googlecode.androidrules.conditions.Condition;
 import com.googlecode.androidrules.conditions.ConditionCommandIs;
 
+import android.app.ActivityManager;
 import android.app.Service;
+import android.app.ActivityManager.RunningServiceInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -36,26 +40,29 @@ import android.os.IBinder;
  * This class monitors phone events and user actions and triggers actions on events when conditions are met
  */
 public class BroadcastsHandlerService extends Service {
-    
+
     // Intent broadcasted to the system when the user sends a command to talkmyphone via jabber
     public final static String USER_COMMAND_RECEIVED = "com.googlecode.talkmyphone.USER_COMMAND_RECEIVED";
-    
+
     // Intent broadcasted by the system when it wants to send a message to the user via talkmyphone
     public final static String MESSAGE_TO_TRANSMIT = "com.googlecode.talkmyphone.MESSAGE_TO_TRANSMIT";
 
     private Context mContext;
     private ArrayList<Rule> mRules = new ArrayList<Rule>();
-    private static boolean isRunning = false;
-    
-    public static boolean isRunning() {
-    	return isRunning;
-    }
 
-    public void destroy() {
-        for(Rule rule : mRules) {
-            rule.enable(false);
+    public static boolean isRunning(Context context) {
+        ActivityManager activityManager = (ActivityManager)context.getSystemService(ACTIVITY_SERVICE);
+        List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
+
+        for (RunningServiceInfo serviceInfo : services) {
+            ComponentName componentName = serviceInfo.service;
+            String serviceName = componentName.getClassName();
+            if (serviceName.equals(BroadcastsHandlerService.class.getName())) {
+                return true;
+            }
         }
-        mRules = null;
+
+        return false;
     }
 
     public void addRule(IntentFilter filteredEvent, Condition condition, Action action, String settingsName) {
@@ -68,11 +75,10 @@ public class BroadcastsHandlerService extends Service {
             rule.updateFromSettings();
         }
     }
-    
-	@Override
+
+    @Override
     public void onCreate(){
 
-		isRunning = true;
         mContext = getApplicationContext();
 
         addRule(new IntentFilter(Intent.ACTION_BATTERY_CHANGED),
@@ -185,14 +191,16 @@ public class BroadcastsHandlerService extends Service {
 
     }
 
-	@Override
-	public IBinder onBind(Intent arg0) {
-		return null;
-	}
+    @Override
+    public IBinder onBind(Intent arg0) {
+        return null;
+    }
 
-	@Override
+    @Override
     public void onDestroy() {
-        isRunning = false;
-        destroy();
+        for(Rule rule : mRules) {
+            rule.enable(false);
+        }
+        mRules = null;
     }
 }
