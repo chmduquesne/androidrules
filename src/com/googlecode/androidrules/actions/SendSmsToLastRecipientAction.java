@@ -12,6 +12,7 @@ import android.content.Intent;
 public class SendSmsToLastRecipientAction extends Action {
 
     private Context mContext;
+    private String statusMessage = "";
 
     public SendSmsToLastRecipientAction(Context context) {
         mContext = context;
@@ -22,22 +23,22 @@ public class SendSmsToLastRecipientAction extends Action {
         SmsMmsManager smsMmsManager = new SmsMmsManager(mContext);
         ContactsManager contactsManager = new ContactsManager(mContext);
         if (Phone.isCellPhoneNumber(contact)) {
-            appendResult("Sending sms to " + contactsManager.getContactName(contact));
+            statusMessage += "Sending sms to " + contactsManager.getContactName(contact);
             smsMmsManager.sendSMSByPhoneNumber(message, contact);
         } else {
             ArrayList<Phone> mobilePhones = contactsManager.getMobilePhones(contact);
             if (mobilePhones.size() > 1) {
-                appendResult("Specify more details:");
+                statusMessage += "Specify more details:";
 
                 for (Phone phone : mobilePhones) {
-                    appendResult(phone.contactName + " - " + phone.cleanNumber);
+                    statusMessage += phone.contactName + " - " + phone.cleanNumber;
                 }
             } else if (mobilePhones.size() == 1) {
                 Phone phone = mobilePhones.get(0);
-                appendResult("Sending sms to " + phone.contactName + " (" + phone.cleanNumber + ")");
+                statusMessage += "Sending sms to " + phone.contactName + " (" + phone.cleanNumber + ")";
                 smsMmsManager.sendSMSByPhoneNumber(message, phone.cleanNumber);
             } else {
-                appendResult("No match for \"" + contact + "\"");
+                statusMessage += "No match for \"" + contact + "\"";
             }
         }
     }
@@ -45,11 +46,23 @@ public class SendSmsToLastRecipientAction extends Action {
     @Override
     public void execute(Intent intent) {
         if (SendOrReadSmsAction.lastRecipient == null) {
-            appendResult("Error: no recipient registered.");
+            statusMessage += "Error: no recipient registered.";
         } else {
             String args = intent.getStringExtra("args");
             sendSMS(args, SendOrReadSmsAction.lastRecipient);
         }
+        setVariable("statusMessage", statusMessage);
     }
 
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {""};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {"statusMessage"};
+        return res;
+    }
 }

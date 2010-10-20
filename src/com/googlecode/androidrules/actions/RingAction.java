@@ -11,8 +11,8 @@ import android.provider.Settings;
 public class RingAction extends Action {
 
     private static MediaPlayer mMediaPlayer;
-
     private Context mContext;
+    private String statusMessage = "";
 
     public RingAction(Context context) {
         mContext = context;
@@ -42,7 +42,7 @@ public class RingAction extends Action {
         try {
             mMediaPlayer.setDataSource(mContext, ringtoneUri);
         } catch (Exception e) {
-            appendResult(e.toString());
+            statusMessage += e.toString();
         }
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
         mMediaPlayer.setLooping(true);
@@ -64,7 +64,7 @@ public class RingAction extends Action {
             try {
                 mMediaPlayer.prepare();
             } catch (Exception e) {
-                appendResult(e.toString());
+                statusMessage += e.toString();
             }
             mMediaPlayer.start();
         }
@@ -78,11 +78,24 @@ public class RingAction extends Action {
         // Get the ringtone
         String ringtone = getRingtoneFromPreferences();
         if (ringtone.equals("")) {
-            appendResult("Unable to ring, change the ringtone in the options");
+            statusMessage += "Unable to ring, change the ringtone in the options";
         } else {
-            appendResult("Ringing phone");
+            statusMessage += "Ringing phone";
             buildNewPlayer(ringtone);
             play();
         }
+        setVariable("statusMessage", statusMessage);
+    }
+
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {""};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {"statusMessage"};
+        return res;
     }
 }

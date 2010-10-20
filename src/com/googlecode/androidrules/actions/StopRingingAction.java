@@ -9,4 +9,15 @@ public class StopRingingAction extends Action {
         RingAction.destroyPreviousPlayer();
     }
 
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {""};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {""};
+        return res;
+    }
 }

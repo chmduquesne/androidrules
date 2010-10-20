@@ -18,11 +18,22 @@ public class CopyToClipBoardAction extends Action {
         try {
             ClipboardManager clipboard = (ClipboardManager) mContext.getSystemService(android.content.Context.CLIPBOARD_SERVICE);
             clipboard.setText(text);
-            appendResult("Text copied");
+            setVariable("statusMessage", "Text copied");
         }
         catch(Exception ex) {
-            appendResult("Clipboard access failed");
+            setVariable("statusMessage", "Clipboard access failed");
         }
     }
 
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {"args"};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {"statusMessage"};
+        return res;
+    }
 }

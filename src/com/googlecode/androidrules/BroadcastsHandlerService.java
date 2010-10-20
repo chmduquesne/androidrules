@@ -5,6 +5,7 @@ import java.util.List;
 
 
 import com.googlecode.androidrules.actions.Action;
+import com.googlecode.androidrules.actions.AssignLocalVariableAction;
 import com.googlecode.androidrules.actions.ActionsSequence;
 import com.googlecode.androidrules.actions.CopyToClipBoardAction;
 import com.googlecode.androidrules.actions.DialAction;
@@ -12,7 +13,6 @@ import com.googlecode.androidrules.actions.GeoAction;
 import com.googlecode.androidrules.actions.NotifyBatteryStateAction;
 import com.googlecode.androidrules.actions.NotifyCallAction;
 import com.googlecode.androidrules.actions.NotifyMatchingContactsAction;
-import com.googlecode.androidrules.actions.NotifyResultOfActionAction;
 import com.googlecode.androidrules.actions.NotifySmsDeliveredAction;
 import com.googlecode.androidrules.actions.NotifySmsReceivedAction;
 import com.googlecode.androidrules.actions.NotifySmsSentAction;
@@ -47,9 +47,10 @@ public class BroadcastsHandlerService extends Service {
     // Intent broadcasted by the system when it wants to send a message to the user via talkmyphone
     public final static String MESSAGE_TO_TRANSMIT = "com.googlecode.talkmyphone.MESSAGE_TO_TRANSMIT";
 
-    private Context mContext;
+    // Rules
     private ArrayList<Rule> mRules = new ArrayList<Rule>();
 
+    // Checks if the service is running
     public static boolean isRunning(Context context) {
         ActivityManager activityManager = (ActivityManager)context.getSystemService(ACTIVITY_SERVICE);
         List<RunningServiceInfo> services = activityManager.getRunningServices(Integer.MAX_VALUE);
@@ -66,7 +67,7 @@ public class BroadcastsHandlerService extends Service {
     }
 
     public void addRule(IntentFilter filteredEvent, Condition condition, Action action, String settingsName) {
-        Rule rule =  new Rule(mContext, filteredEvent, condition, action, settingsName);
+        Rule rule =  new Rule(getApplicationContext(), filteredEvent, condition, action, settingsName);
         mRules.add(rule);
     }
 
@@ -79,11 +80,11 @@ public class BroadcastsHandlerService extends Service {
     @Override
     public void onCreate(){
 
-        mContext = getApplicationContext();
+        Context context = getApplicationContext();
 
         addRule(new IntentFilter(Intent.ACTION_BATTERY_CHANGED),
                 null,
-                new NotifyBatteryStateAction(mContext),
+                new NotifyBatteryStateAction(context),
                 "notifyBattery");
 
         StringBuilder builder = new StringBuilder();
@@ -100,31 +101,41 @@ public class BroadcastsHandlerService extends Service {
         builder.append("and you can paste links and open it with the appropriate app\n");
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("?"),
-                new SendAction(mContext, builder.toString()),
+                new ActionsSequence(
+                        new AssignLocalVariableAction("message", builder.toString()),
+                        new SendAction(context)
+                        ),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("ring"),
-                new RingAction(mContext),
+                new ActionsSequence(
+                        new RingAction(context).setPropagate("statusMessage", "message"),
+                        new SendAction(context)
+                        ),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("stop"),
                 new ActionsSequence(
-                        new SendAction(mContext, "Stopping ongoing actions"),
+                        new AssignLocalVariableAction("message", "Stopping ongoing actions"),
+                        new SendAction(context),
                         new StopRingingAction(),
-                        new StopLocatingPhoneAction(mContext)
+                        new StopLocatingPhoneAction(context)
                         ),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("copy"),
-                new CopyToClipBoardAction(mContext),
+                new ActionsSequence(
+                        new CopyToClipBoardAction(context).setPropagate("statusMessage", "message"),
+                        new SendAction(context)
+                        ),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("contact"),
-                new NotifyMatchingContactsAction(mContext),
+                new NotifyMatchingContactsAction(context),
                 null);
 
         addRule(new IntentFilter("SMS_SENT"),
@@ -134,57 +145,64 @@ public class BroadcastsHandlerService extends Service {
 
         addRule(new IntentFilter("SMS_DELIVERED"),
                 null,
-                new NotifySmsDeliveredAction(mContext),
+                new NotifySmsDeliveredAction(context),
                 "notifySmsDelivered");
 
         addRule(new IntentFilter("android.provider.Telephony.SMS_RECEIVED"),
                 null,
-                new NotifySmsReceivedAction(mContext),
+                new NotifySmsReceivedAction(context),
                 "notifyIncomingSms");
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("dial"),
-                new DialAction(mContext),
+                new ActionsSequence(
+                        new DialAction(context).setPropagate("statusMessage", "message"),
+                        new SendAction(context)
+                        ),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("http"),
-                new OpenAction(mContext),
+                new OpenAction(context),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("https"),
-                new OpenAction(mContext),
-                null);
-
-        addRule(new IntentFilter("TALKMYPHONE_RESULT_OF_ACTION"),
-                null,
-                new NotifyResultOfActionAction(mContext),
+                new OpenAction(context),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("sms"),
-                new SendOrReadSmsAction(mContext),
+                new ActionsSequence(
+                        new SendOrReadSmsAction(context).setPropagate("statusMessage", "message"),
+                        new SendAction(context)
+                        ),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("reply"),
-                new SendSmsToLastRecipientAction(mContext),
+                new ActionsSequence(
+                        new SendSmsToLastRecipientAction(context).setPropagate("statusMessage", "message"),
+                        new SendAction(context)
+                        ),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("where"),
-                new StartLocatingPhoneAction(mContext),
+                new StartLocatingPhoneAction(context),
                 null);
 
         addRule(new IntentFilter(USER_COMMAND_RECEIVED),
                 new ConditionCommandIs("geo"),
-                new GeoAction(mContext),
+                new ActionsSequence(
+                        new GeoAction(context).setPropagate("statusMessage", "message"),
+                        new SendAction(context)
+                        ),
                 null);
 
         addRule(new IntentFilter("android.intent.action.PHONE_STATE"),
                 null,
-                new NotifyCallAction(mContext),
+                new NotifyCallAction(context),
                 "notifyIncomingCalls");
 
         updateRulesFromSettings();

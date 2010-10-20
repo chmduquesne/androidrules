@@ -27,7 +27,18 @@ public class NotifySmsSentAction extends Action {
                 res = "Radio off";
                 break;
         }
-        appendResult(res);
+        setVariable("statusMessage", res);
     }
 
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {"ResultCode"};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {"statusMessage"};
+        return res;
+    }
 }

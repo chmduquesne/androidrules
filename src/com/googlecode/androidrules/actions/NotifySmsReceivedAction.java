@@ -42,4 +42,15 @@ public class NotifySmsReceivedAction extends Action {
         }
     }
 
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {""};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {""};
+        return res;
+    }
 }

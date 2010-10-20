@@ -22,4 +22,15 @@ public class NotifyCallAction extends Action {
         telephony.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
     }
 
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {""};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {""};
+        return res;
+    }
 }

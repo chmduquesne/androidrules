@@ -32,4 +32,16 @@ public class NotifyBatteryStateAction extends Action {
         i.putExtra("message", "Battery level " + level + "%");
         mContext.sendBroadcast(i);
     }
+
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {""};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {""};
+        return res;
+    }
 }

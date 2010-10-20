@@ -12,6 +12,7 @@ import android.net.Uri;
 public class DialAction extends Action {
 
     private Context mContext;
+    private String statusMessage = "";
 
     public DialAction(Context context) {
         mContext = context;
@@ -43,25 +44,39 @@ public class DialAction extends Action {
         } else {
             ArrayList<Phone> mobilePhones = contactsManager.getMobilePhones(searchedText);
             if (mobilePhones.size() > 1) {
-                appendResult("Specify more details:");
+                statusMessage += "Specify more details:";
 
                 for (Phone phone : mobilePhones) {
-                    appendResult(phone.contactName + " - " + phone.cleanNumber);
+                    statusMessage += phone.contactName + " - " + phone.cleanNumber;
                 }
             } else if (mobilePhones.size() == 1) {
                 Phone phone = mobilePhones.get(0);
                 contact = phone.contactName;
                 number = phone.cleanNumber;
             } else {
-                appendResult("No match for \"" + searchedText + "\"");
+                statusMessage += "No match for \"" + searchedText + "\"";
             }
         }
 
         if( number != null) {
-            appendResult("Dial " + contact + " (" + number + ")");
+            statusMessage += "Dial " + contact + " (" + number + ")";
             if(!dial(number)) {
-                appendResult("Error can't dial.");
+                statusMessage += "Error can't dial.";
             }
         }
+
+        setVariable("statusMessage", statusMessage);
+    }
+
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {""};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {"statusMessage"};
+        return res;
     }
 }

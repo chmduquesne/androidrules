@@ -88,4 +88,16 @@ public class NotifyMatchingContactsAction extends Action {
             mContext.sendBroadcast(i);
         }
     }
+
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {""};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {""};
+        return res;
+    }
 }

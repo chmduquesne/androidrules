@@ -16,6 +16,7 @@ import android.content.SharedPreferences;
 public class SendOrReadSmsAction extends Action {
 
     private Context mContext;
+    private String statusMessage = "";
     public static String lastRecipient;
 
     public void setLastRecipient(String phoneNumber) {
@@ -27,14 +28,14 @@ public class SendOrReadSmsAction extends Action {
 
     public void displayLastRecipient(String phoneNumber) {
         if (phoneNumber == null) {
-            appendResult("Reply contact is not set");
+            statusMessage += "Reply contact is not set";
         } else {
             ContactsManager contactsManager = new ContactsManager(mContext);
             String contact = contactsManager.getContactName(phoneNumber);
             if (Phone.isCellPhoneNumber(phoneNumber) && contact.compareTo(phoneNumber) != 0){
                 contact += " (" + phoneNumber + ")";
             }
-            appendResult("Reply contact is now " + contact);
+            statusMessage += "Reply contact is now " + contact;
         }
     }
 
@@ -99,16 +100,16 @@ public class SendOrReadSmsAction extends Action {
                     if (smsList.size() < smsNumber) {
                         smsContact.append("\r\n" + makeItalic("Only got " + smsList.size() + " sms"));
                     }
-                    appendResult(smsContact.toString() + "\r\n");
+                    statusMessage += smsContact.toString() + "\r\n";
                 } else {
                     noSms.append(contact.name + " - No sms found\r\n");
                 }
             }
             if (!hasMatch) {
-                appendResult(noSms.toString());
+                statusMessage += noSms.toString();
             }
         } else {
-            appendResult("No match for \"" + searchedText + "\"");
+            statusMessage += "No match for \"" + searchedText + "\"";
         }
     }
 
@@ -117,22 +118,22 @@ public class SendOrReadSmsAction extends Action {
         SmsMmsManager smsMmsManager = new SmsMmsManager(mContext);
         ContactsManager contactsManager = new ContactsManager(mContext);
         if (Phone.isCellPhoneNumber(contact)) {
-            appendResult("Sending sms to " + contactsManager.getContactName(contact));
+            statusMessage += "Sending sms to " + contactsManager.getContactName(contact);
             smsMmsManager.sendSMSByPhoneNumber(message, contact);
         } else {
             ArrayList<Phone> mobilePhones = contactsManager.getMobilePhones(contact);
             if (mobilePhones.size() > 1) {
-                appendResult("Specify more details:");
+                statusMessage += "Specify more details:";
 
                 for (Phone phone : mobilePhones) {
-                    appendResult(phone.contactName + " - " + phone.cleanNumber);
+                    statusMessage += phone.contactName + " - " + phone.cleanNumber;
                 }
             } else if (mobilePhones.size() == 1) {
                 Phone phone = mobilePhones.get(0);
-                appendResult("Sending sms to " + phone.contactName + " (" + phone.cleanNumber + ")");
+                statusMessage += "Sending sms to " + phone.contactName + " (" + phone.cleanNumber + ")";
                 smsMmsManager.sendSMSByPhoneNumber(message, phone.cleanNumber);
             } else {
-                appendResult("No match for \"" + contact + "\"");
+                statusMessage += "No match for \"" + contact + "\"";
             }
         }
     }
@@ -154,6 +155,18 @@ public class SendOrReadSmsAction extends Action {
         } else {
             displayLastRecipient(lastRecipient);
         }
+        setVariable("statusMessage", statusMessage);
     }
 
+    @Override
+    public String[] getExpectedIntentExtraParameters() {
+        String [] res = {"args"};
+        return res;
+    }
+
+    @Override
+    public String[] getProvidedVariables() {
+        String [] res = {"statusMessage"};
+        return res;
+    }
 }
