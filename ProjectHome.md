@@ -1,0 +1,1 @@
+Define rules to automate an android device.
